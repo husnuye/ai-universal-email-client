@@ -75,6 +75,20 @@ Outputs:
 - follow-up recommendation
 - suggested next action
 
+### Ask AI Agent
+
+File: `lib/agents/ask-ai-agent.ts`
+
+Purpose: Provide a live command-bar style interaction for the selected email thread.
+
+Outputs:
+
+- intent
+- deterministic answer
+- simulated streaming trace
+
+The implementation reuses the existing orchestrator result and can later delegate answer generation to Claude/OpenAI without changing the UI contract.
+
 ### Semantic Search Agent
 
 File: `lib/agents/semantic-search-agent.ts`

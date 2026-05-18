@@ -25,6 +25,17 @@ Provider adapter receives message
   -> Render insight in the UI
 ```
 
+## Live Ask AI Workflow
+
+```text
+User asks a question about selected thread
+  -> Simulated agent trace appears step by step
+  -> Existing orchestrator result is reused
+  -> Ask AI Agent returns deterministic answer
+```
+
+The Ask AI panel supports summary, reply draft, security, follow-up, and general next-action questions. The trace is simulated for demo clarity, while the answer is grounded in the selected email and orchestrator output.
+
 ## Deterministic Fallback Workflow
 
 The demo does not require real Claude/OpenAI calls. Each agent uses deterministic logic by default and returns a fallback response if analysis fails. Future LLM calls can be plugged into each agent while preserving the same typed output contract.

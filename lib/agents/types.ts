@@ -73,6 +73,12 @@ export type EmailWorkflowResult = {
   }>;
 };
 
+export type AskAIResult = {
+  answer: string;
+  intent: "summary" | "reply" | "security" | "follow-up" | "general";
+  trace: string[];
+};
+
 export type AgentExecution<T = unknown> = {
   output: T;
   status: "ok" | "fallback";

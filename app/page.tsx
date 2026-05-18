@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { searchEmails, toEmailInput } from "@/lib/ai-agents";
+import { askAITraceSteps, runAskAIAgent } from "@/lib/agents/ask-ai-agent";
 import { runEmailWorkflowOrchestrator } from "@/lib/orchestrator/email-workflow-orchestrator";
 import { accounts, emails as seedEmails } from "@/lib/email-data";
 import type { Email } from "@/lib/types";
@@ -43,6 +44,10 @@ export default function Home() {
   const [composerMode, setComposerMode] = useState<"compose" | "reply" | "forward" | null>(
     null
   );
+  const [askAIQuestion, setAskAIQuestion] = useState("");
+  const [askAIResponse, setAskAIResponse] = useState("");
+  const [askAITrace, setAskAITrace] = useState<string[]>([]);
+  const [askAIRunning, setAskAIRunning] = useState(false);
 
   const visibleEmails = useMemo(() => {
     const active = emails.filter((email) => !email.archived && !email.deleted);
@@ -70,6 +75,36 @@ export default function Home() {
     setEmails((current) =>
       current.map((email) => (email.id === id ? { ...email, ...patch } : email))
     );
+  }
+
+  function runAskAI(question: string) {
+    const trimmed = question.trim();
+
+    if (!trimmed || askAIRunning) {
+      return;
+    }
+
+    setAskAIQuestion(trimmed);
+    setAskAIResponse("");
+    setAskAITrace([]);
+    setAskAIRunning(true);
+
+    askAITraceSteps.forEach((step, index) => {
+      window.setTimeout(() => {
+        setAskAITrace((current) => [...current, step]);
+
+        if (index === askAITraceSteps.length - 1) {
+          const result = runAskAIAgent(trimmed, toEmailInput(selectedEmail), workflowResult);
+          setAskAIResponse(result.answer);
+          setAskAIRunning(false);
+        }
+      }, 260 * (index + 1));
+    });
+  }
+
+  function handleAskAISubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    runAskAI(askAIQuestion);
   }
 
   return (
@@ -314,6 +349,15 @@ export default function Home() {
                 </div>
                 <p className="text-sm leading-6 text-slate-600">{workflowResult.securityReasons.join(" ")}</p>
               </div>
+              <AskAIPanel
+                question={askAIQuestion}
+                response={askAIResponse}
+                trace={askAITrace}
+                running={askAIRunning}
+                onQuestionChange={setAskAIQuestion}
+                onSubmit={handleAskAISubmit}
+                onQuickAction={runAskAI}
+              />
               <div className="mt-3 rounded-md border border-slate-200 bg-white p-3">
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900">
                   <Zap size={16} />
@@ -368,6 +412,7 @@ const checklistItems = [
   ["Labels", "Done", "Label chips and label search shortcuts"],
   ["Archive / delete", "Done", "Inbox state updates for selected email"],
   ["AI summaries", "Done", "AI insight summary panel"],
+  ["Live AI interaction / Ask AI command bar", "Done", "Ask AI panel runs simulated agent trace for the selected email"],
   ["Reply drafts", "Done", "Smart Reply draft with tone selector"],
   ["Prioritization", "Done", "Priority agent badges and dashboard metric"],
   ["CLAUDE.md", "Done", "Project instructions and Claude Code discipline"],
@@ -376,6 +421,83 @@ const checklistItems = [
   ["Automated tests", "Done", "Vitest and Playwright coverage"],
   ["Live Vercel URL", "Pending", "Deploy after final local approval"]
 ] as const;
+
+function AskAIPanel({
+  question,
+  response,
+  trace,
+  running,
+  onQuestionChange,
+  onSubmit,
+  onQuickAction
+}: {
+  question: string;
+  response: string;
+  trace: string[];
+  running: boolean;
+  onQuestionChange: (value: string) => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onQuickAction: (question: string) => void;
+}) {
+  const actions = [
+    "Summarize this thread",
+    "Draft a reply",
+    "Is this suspicious?",
+    "What needs follow-up?"
+  ];
+
+  return (
+    <div className="mt-3 rounded-md border border-blue-100 bg-blue-50 p-3">
+      <div className="mb-2 flex items-center gap-2 text-sm font-bold text-marine">
+        <Sparkles size={16} />
+        Ask AI
+      </div>
+      <form className="flex gap-2" onSubmit={onSubmit}>
+        <input
+          aria-label="Ask AI about this thread"
+          className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-marine focus:ring-4 focus:ring-marine/10"
+          placeholder="Ask AI about this thread..."
+          value={question}
+          onChange={(event) => onQuestionChange(event.target.value)}
+        />
+        <button
+          className="rounded-md bg-marine px-3 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={running || !question.trim()}
+          type="submit"
+        >
+          Ask
+        </button>
+      </form>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {actions.map((action) => (
+          <button
+            className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:text-marine hover:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={running}
+            key={action}
+            onClick={() => onQuickAction(action)}
+          >
+            {action}
+          </button>
+        ))}
+      </div>
+      {trace.length > 0 ? (
+        <ol className="mt-3 space-y-1.5 text-xs font-semibold text-slate-600">
+          {trace.map((step) => (
+            <li className="flex items-center gap-2" key={step}>
+              <span className="h-1.5 w-1.5 rounded-full bg-marine" />
+              {step}
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      {response ? (
+        <div className="mt-3 rounded-md border border-blue-100 bg-white p-3 text-sm leading-6 text-slate-700">
+          {response}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function AssignmentChecklist() {
   return (
