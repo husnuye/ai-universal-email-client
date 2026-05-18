@@ -73,7 +73,7 @@ export type EmailWorkflowResult = {
   }>;
 };
 
-export type AgentExecution<T> = {
+export type AgentExecution<T = unknown> = {
   output: T;
   status: "ok" | "fallback";
   note: string;
