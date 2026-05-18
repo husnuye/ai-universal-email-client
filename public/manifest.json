@@ -1,0 +1,11 @@
+{
+  "name": "TriageMail AI",
+  "short_name": "TriageMail",
+  "description": "AI-first universal email client",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#f7f5ef",
+  "icons": []
+}
+
