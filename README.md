@@ -64,7 +64,7 @@ npm run test:e2e
 - Reply tone selector for professional, friendly, and concise AI drafts
 - Provider architecture note explaining where Gmail, Microsoft Graph, Yahoo IMAP, and AOL IMAP integrations attach
 
-## Final Delivery Checklist
+## Final Delivery / AI Workspace Capabilities
 
 - [ ] Vercel live URL
 - [x] GitHub repo

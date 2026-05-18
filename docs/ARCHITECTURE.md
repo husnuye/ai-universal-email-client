@@ -105,7 +105,7 @@ Primary screens and panels:
 - AI Insight Panel
 - Semantic Search
 - Security Center light view
-- Assignment Checklist
+- AI Workspace Capabilities
 
 ## Testing
 

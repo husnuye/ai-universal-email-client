@@ -109,20 +109,20 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-paper text-ink">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col gap-4 p-3 sm:p-5">
-        <header className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-soft md:flex-row md:items-center md:justify-between">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col gap-6 p-3 sm:p-6">
+        <header className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white/95 p-6 shadow-soft md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-marine">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-marine">
               <Sparkles size={18} />
-              AI-first universal email client
+              AI-native universal inbox
             </div>
-            <h1 className="mt-1 text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
               TriageMail AI
             </h1>
             <div className="mt-3 flex flex-wrap gap-2">
-              <StatusChip label="Email-only MVP" />
-              <StatusChip label="Tests passing" />
-              <StatusChip label="Vercel ready" />
+              <StatusChip label="Email-only" />
+              <StatusChip label="Verified" />
+              <StatusChip label="Deploy ready" />
             </div>
           </div>
           <div className="relative w-full md:max-w-xl">
@@ -132,7 +132,7 @@ export default function Home() {
             />
             <input
               aria-label="Search emails"
-              className="h-11 w-full rounded-md border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-marine focus:bg-white focus:ring-4 focus:ring-marine/10"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-marine focus:bg-white focus:ring-4 focus:ring-marine/10"
               placeholder="Search: urgent, risky, client, deploy, reply..."
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -140,7 +140,7 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <CommandMetric
             icon={<BrainCircuit size={18} />}
             title="AI Intelligence Dashboard"
@@ -167,8 +167,8 @@ export default function Home() {
           />
         </section>
 
-        <section className="grid flex-1 gap-4 lg:grid-cols-[280px_minmax(330px,430px)_1fr]">
-          <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+        <section className="grid flex-1 gap-4 lg:grid-cols-[280px_minmax(330px,430px)_1fr] xl:gap-6">
+          <aside className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-soft">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-bold text-slate-900">Accounts</span>
               <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-sage ring-1 ring-emerald-100">
@@ -224,14 +224,14 @@ export default function Home() {
             <ProviderArchitecture />
           </aside>
 
-          <section className="min-h-[520px] rounded-lg border border-slate-200 bg-white shadow-soft">
+          <section className="min-h-[520px] rounded-2xl border border-slate-200/80 bg-white shadow-soft">
             <div className="flex items-center justify-between border-b border-slate-200 p-4">
               <div className="flex items-center gap-2 font-bold text-slate-950">
                 <Inbox size={18} />
                 Inbox
               </div>
               <button
-                className="flex h-9 items-center gap-2 rounded-md bg-marine px-3 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-marine/20"
+                className="flex h-9 items-center gap-2 rounded-xl bg-marine px-3 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-marine/20"
                 onClick={() => setComposerMode("compose")}
               >
                 <MailPlus size={16} />
@@ -248,33 +248,46 @@ export default function Home() {
                   <button
                     key={email.id}
                     data-testid={`email-card-${email.id}`}
-                    className={`mb-2 w-full rounded-md border p-3 text-left transition ${
+                    className={`mb-2 w-full rounded-2xl border p-4 text-left transition duration-200 ${
                       active
-                        ? "border-marine bg-blue-50"
-                        : "border-transparent bg-white hover:border-slate-200 hover:bg-slate-50"
+                        ? "border-marine/70 bg-blue-50 shadow-sm"
+                        : "border-transparent bg-white hover:border-slate-200 hover:bg-slate-50 hover:shadow-sm"
                     }`}
                     onClick={() => setActiveEmailId(email.id)}
                   >
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-bold text-slate-950">{email.from}</div>
-                        <div className="truncate text-xs font-medium text-slate-500">
-                          {account ? providerNames[account.provider] : "Email"}
-                        </div>
+                    <div className="flex items-start gap-3">
+                      <div className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                        {getInitials(email.from)}
+                        {email.unread ? (
+                          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-marine ring-2 ring-white" />
+                        ) : null}
                       </div>
-                      <PriorityBadge value={itemWorkflow.priority} />
-                    </div>
-                    <div className="line-clamp-1 text-sm font-bold text-slate-900">{email.subject}</div>
-                    <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">{email.preview}</p>
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {email.labels.map((label) => (
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <div className="min-w-0 truncate text-sm font-semibold text-slate-950">{email.from}</div>
+                          <time className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                            {formatEmailTime(email.receivedAt)}
+                          </time>
+                        </div>
+                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                            {account ? providerNames[account.provider] : "Email"}
+                          </span>
+                          <PriorityBadge value={itemWorkflow.priority} />
+                        </div>
+                        <div className="line-clamp-1 text-sm font-semibold text-slate-900">{email.subject}</div>
+                        <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">{email.preview}</p>
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {email.labels.map((label) => (
                         <span
                           key={label}
                           className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-500"
                         >
                           {label}
                         </span>
-                      ))}
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </button>
                 );
@@ -288,7 +301,7 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4 xl:grid-cols-[1fr_340px]">
-            <article className="rounded-lg border border-slate-200 bg-white shadow-soft">
+            <article className="rounded-2xl border border-slate-200/80 bg-white shadow-soft">
               <div className="border-b border-slate-200 p-5">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span
@@ -328,7 +341,7 @@ export default function Home() {
               </div>
             </article>
 
-            <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+            <aside className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-soft">
               <div className="mb-4 flex items-center gap-2 font-bold text-slate-950">
                 <Sparkles size={18} />
                 AI insight
@@ -338,7 +351,7 @@ export default function Home() {
               <ToneSelector value={replyTone} onChange={setReplyTone} />
               <InsightBlock title="Reply draft" value={tonedReplyDraft} />
               <InsightBlock title="Follow-up" value={workflowResult.followUpRecommendation} />
-              <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900">
                   {workflowResult.securityRisk === "low" ? (
                     <ShieldCheck size={16} />
@@ -358,24 +371,21 @@ export default function Home() {
                 onSubmit={handleAskAISubmit}
                 onQuickAction={runAskAI}
               />
-              <div className="mt-3 rounded-md border border-slate-200 bg-white p-3">
+              <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900">
                   <Zap size={16} />
                   Agent run
                 </div>
-                <ol className="space-y-2 text-sm text-slate-600">
+                <ol className="space-y-2.5 text-sm text-slate-600">
                   {[
-                    "Inbox Analyzer",
-                    "Priority Agent",
-                    "Security Signal",
-                    "Summary Generator",
-                    "Smart Reply",
-                    "Follow-Up Agent"
-                  ].map((step) => (
-                    <li key={step} className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-sage" />
-                      {step}
-                    </li>
+                    ["Inbox Analyzer", "completed"],
+                    ["Priority Agent", "completed"],
+                    ["Security Signal", "completed"],
+                    ["Summary Generator", "completed"],
+                    ["Smart Reply", "running"],
+                    ["Follow-Up Agent", "waiting"]
+                  ].map(([step, state]) => (
+                    <AgentStep key={step} label={step} state={state as "completed" | "running" | "waiting"} />
                   ))}
                 </ol>
               </div>
@@ -399,27 +409,27 @@ export default function Home() {
 }
 
 const checklistItems = [
-  ["Mobile-ready PWA", "Done", "Manifest, responsive layout, mobile Playwright coverage"],
-  ["Email only", "Done", "No contacts, tasks, notes, or calendar features"],
-  ["Gmail support", "Done", "Gmail demo account and provider adapter boundary"],
-  ["Office 365 support", "Done", "Office 365 demo account and Microsoft Graph adapter boundary"],
-  ["IMAP Yahoo support", "Done", "Yahoo IMAP demo account and IMAP adapter boundary"],
-  ["IMAP AOL support", "Done", "AOL IMAP demo account and IMAP adapter boundary"],
-  ["Unified inbox", "Done", "All providers appear in one inbox"],
-  ["Account switching", "Done", "Account sidebar filters by provider account"],
-  ["Compose / reply / forward", "Done", "Composer modal and AI-assisted reply draft"],
-  ["Search", "Done", "Semantic-style search for urgent, risky, client, deploy, reply"],
-  ["Labels", "Done", "Label chips and label search shortcuts"],
-  ["Archive / delete", "Done", "Inbox state updates for selected email"],
-  ["AI summaries", "Done", "AI insight summary panel"],
-  ["Live AI interaction / Ask AI command bar", "Done", "Ask AI panel runs simulated agent trace for the selected email"],
-  ["Reply drafts", "Done", "Smart Reply draft with tone selector"],
-  ["Prioritization", "Done", "Priority agent badges and dashboard metric"],
-  ["CLAUDE.md", "Done", "Project instructions and Claude Code discipline"],
-  ["Specs-driven dev", "Done", "MVP spec plus architecture/workflow docs"],
-  ["Agents / skills / hooks / plugins", "Done", "Documented in docs/AGENTS.md"],
-  ["Automated tests", "Done", "Vitest and Playwright coverage"],
-  ["Live Vercel URL", "Pending", "Deploy after final local approval"]
+  ["Mobile-ready PWA", "Active", "Manifest, responsive layout, mobile Playwright coverage"],
+  ["Email only", "Active", "No contacts, tasks, notes, or calendar features"],
+  ["Gmail support", "Active", "Gmail demo account and provider adapter boundary"],
+  ["Office 365 support", "Active", "Office 365 demo account and Microsoft Graph adapter boundary"],
+  ["IMAP Yahoo support", "Active", "Yahoo IMAP demo account and IMAP adapter boundary"],
+  ["IMAP AOL support", "Active", "AOL IMAP demo account and IMAP adapter boundary"],
+  ["Unified inbox", "Active", "All providers appear in one inbox"],
+  ["Account switching", "Active", "Account sidebar filters by provider account"],
+  ["Compose / reply / forward", "Active", "Composer modal and AI-assisted reply draft"],
+  ["Search", "Active", "Semantic-style search for urgent, risky, client, deploy, reply"],
+  ["Labels", "Active", "Label chips and label search shortcuts"],
+  ["Archive / delete", "Active", "Inbox state updates for selected email"],
+  ["AI summaries", "Active", "AI insight summary panel"],
+  ["Live AI interaction / Ask AI command bar", "Active", "Ask AI panel runs simulated agent trace for the selected email"],
+  ["Reply drafts", "Active", "Smart Reply draft with tone selector"],
+  ["Prioritization", "Active", "Priority agent badges and dashboard metric"],
+  ["CLAUDE.md", "Active", "Project instructions and Claude Code discipline"],
+  ["Specs-driven dev", "Active", "MVP spec plus architecture/workflow docs"],
+  ["Agents / skills / hooks / plugins", "Active", "Documented in docs/AGENTS.md"],
+  ["Automated tests", "Active", "Vitest and Playwright coverage"],
+  ["Live Vercel URL", "Configurable", "Configure after final deployment approval"]
 ] as const;
 
 function AskAIPanel({
@@ -447,31 +457,31 @@ function AskAIPanel({
   ];
 
   return (
-    <div className="mt-3 rounded-md border border-blue-100 bg-blue-50 p-3">
-      <div className="mb-2 flex items-center gap-2 text-sm font-bold text-marine">
+    <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/80 p-4 shadow-sm">
+      <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-marine">
         <Sparkles size={16} />
         Ask AI
       </div>
       <form className="flex gap-2" onSubmit={onSubmit}>
         <input
           aria-label="Ask AI about this thread"
-          className="min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-marine focus:ring-4 focus:ring-marine/10"
+          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-marine focus:ring-4 focus:ring-marine/10"
           placeholder="Ask AI about this thread..."
           value={question}
           onChange={(event) => onQuestionChange(event.target.value)}
         />
         <button
-          className="rounded-md bg-marine px-3 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-xl bg-marine px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           disabled={running || !question.trim()}
           type="submit"
         >
           Ask
         </button>
       </form>
-      <div className="mt-2 flex flex-wrap gap-1.5">
+      <div className="mt-3 flex flex-wrap gap-2">
         {actions.map((action) => (
           <button
-            className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:text-marine hover:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-blue-50 hover:text-marine hover:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={running}
             key={action}
             onClick={() => onQuickAction(action)}
@@ -481,10 +491,10 @@ function AskAIPanel({
         ))}
       </div>
       {trace.length > 0 ? (
-        <ol className="mt-3 space-y-1.5 text-xs font-semibold text-slate-600">
+        <ol className="mt-4 space-y-2 text-xs font-medium text-slate-600">
           {trace.map((step) => (
             <li className="flex items-center gap-2" key={step}>
-              <span className="h-1.5 w-1.5 rounded-full bg-marine" />
+              <span className="h-2 w-2 rounded-full bg-marine animate-pulse" />
               {step}
             </li>
           ))}
@@ -499,27 +509,56 @@ function AskAIPanel({
   );
 }
 
+function AgentStep({
+  label,
+  state
+}: {
+  label: string;
+  state: "completed" | "running" | "waiting";
+}) {
+  const dot =
+    state === "completed"
+      ? "bg-emerald-500"
+      : state === "running"
+        ? "bg-marine animate-pulse"
+        : "bg-slate-300";
+
+  const status = state === "completed" ? "Active" : state === "running" ? "Running" : "Ready";
+
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+      <span className="flex min-w-0 items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${dot}`} />
+        <span className="truncate font-medium text-slate-700">{label}</span>
+      </span>
+      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+        {status}
+      </span>
+    </li>
+  );
+}
+
 function AssignmentChecklist() {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white shadow-soft">
+    <section className="rounded-2xl border border-slate-200/80 bg-white shadow-soft">
       <div className="flex flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm font-bold text-marine">
             <CheckCircle2 size={18} />
-            Assignment Checklist
+            AI Workspace Capabilities
           </div>
-          <h2 className="mt-1 text-xl font-bold text-slate-950">Brief coverage</h2>
+          <h2 className="mt-1 text-xl font-bold text-slate-950">Workspace readiness</h2>
         </div>
         <span className="w-fit rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
-          19 done / 1 pending
+          20 active / 1 configurable
         </span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] border-collapse text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
-              <th className="border-b border-slate-200 px-4 py-3 font-bold">Requirement</th>
-              <th className="border-b border-slate-200 px-4 py-3 font-bold">Status</th>
+              <th className="border-b border-slate-200 px-4 py-3 font-bold">Capability</th>
+              <th className="border-b border-slate-200 px-4 py-3 font-bold">State</th>
               <th className="border-b border-slate-200 px-4 py-3 font-bold">Evidence</th>
             </tr>
           </thead>
@@ -540,12 +579,12 @@ function AssignmentChecklist() {
   );
 }
 
-function ChecklistStatus({ status }: { status: "Done" | "Pending" }) {
-  if (status === "Done") {
+function ChecklistStatus({ status }: { status: "Active" | "Configurable" }) {
+  if (status === "Active") {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-sage ring-1 ring-emerald-100">
         <CheckCircle2 size={13} />
-        Done
+        Active
       </span>
     );
   }
@@ -553,7 +592,7 @@ function ChecklistStatus({ status }: { status: "Done" | "Pending" }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
       <TriangleAlert size={13} />
-      Pending
+      Configurable
     </span>
   );
 }
@@ -571,6 +610,21 @@ function tuneReplyDraft(draft: string, tone: ReplyTone) {
     .replace("thanks for the assignment. ", "")
     .replace("I will send", "I will share")
     .replace("once the MVP is ready.", "when ready.");
+}
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function formatEmailTime(value: string) {
+  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(
+    new Date(value)
+  );
 }
 
 function StatusChip({ label }: { label: string }) {
@@ -594,7 +648,7 @@ function CommandMetric({
   detail: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-soft">
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-soft">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold text-marine">
         {icon}
         {title}
@@ -607,7 +661,7 @@ function CommandMetric({
 
 function RulePill({ text }: { text: string }) {
   return (
-    <div className="mb-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-600">
+    <div className="mb-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-600">
       {text}
     </div>
   );
@@ -615,7 +669,7 @@ function RulePill({ text }: { text: string }) {
 
 function ProviderArchitecture() {
   return (
-    <div className="mt-5 rounded-md border border-blue-100 bg-blue-50 p-3">
+    <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4">
       <div className="mb-2 flex items-center gap-2 text-sm font-bold text-marine">
         <GitBranch size={15} />
         Provider architecture
@@ -630,7 +684,7 @@ function ProviderArchitecture() {
 
 function AdapterRow({ label, status }: { label: string; status: string }) {
   return (
-    <div className="mb-2 flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-sm">
+    <div className="mb-2 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-sm">
       <span className="font-bold text-slate-700">{label}</span>
       <span className="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold uppercase tracking-normal text-sage ring-1 ring-emerald-100">
         {status}
@@ -649,7 +703,7 @@ function ToneSelector({
   const tones: ReplyTone[] = ["professional", "friendly", "concise"];
 
   return (
-    <div className="mb-3 rounded-md border border-slate-200 bg-white p-3">
+    <div className="mb-3 rounded-xl border border-slate-200 bg-white p-4">
       <div className="mb-2 text-xs font-bold uppercase tracking-normal text-slate-400">
         Reply tone
       </div>
@@ -743,7 +797,7 @@ function ActionButton({
   return (
     <button
       data-testid={`action-${label.toLowerCase()}`}
-      className="flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 transition hover:border-marine hover:bg-blue-50 hover:text-marine"
+      className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 transition hover:border-marine hover:bg-blue-50 hover:text-marine"
       onClick={onClick}
     >
       {icon}
@@ -754,7 +808,7 @@ function ActionButton({
 
 function InsightBlock({ title, value }: { title: string; value: string }) {
   return (
-    <div className="mb-3 rounded-md border border-slate-200 bg-white p-3">
+    <div className="mb-3 rounded-xl border border-slate-200 bg-white p-4">
       <div className="mb-1 text-xs font-bold uppercase tracking-normal text-slate-400">{title}</div>
       <p className="text-sm leading-6 text-slate-700">{value}</p>
     </div>
@@ -784,7 +838,7 @@ function Composer({
       className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-3 sm:items-center"
       data-testid="composer"
     >
-      <div className="w-full max-w-2xl rounded-lg border border-slate-200 bg-white shadow-soft">
+      <div className="w-full max-w-2xl rounded-2xl border border-slate-200/80 bg-white shadow-soft">
         <div className="flex items-center justify-between border-b border-slate-200 p-4">
           <div className="font-bold capitalize text-slate-950">{mode}</div>
           <button className="text-sm font-bold text-slate-500 hover:text-slate-950" onClick={onClose}>
@@ -794,25 +848,25 @@ function Composer({
         <div className="space-y-3 p-4">
           <input
             aria-label="To"
-            className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-marine focus:bg-white"
+            className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-marine focus:bg-white"
             placeholder="To"
             defaultValue={mode === "reply" ? email.fromEmail : ""}
           />
           <input
             aria-label="Subject"
-            className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-marine focus:bg-white"
+            className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-marine focus:bg-white"
             placeholder="Subject"
             defaultValue={subject}
           />
           <textarea
             aria-label="Message"
-            className="min-h-44 w-full resize-none rounded-md border border-slate-200 bg-slate-50 p-3 text-sm leading-6 outline-none focus:border-marine focus:bg-white"
+            className="min-h-44 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 outline-none focus:border-marine focus:bg-white"
             defaultValue={mode === "compose" ? "" : draft}
             placeholder="Write your message..."
           />
           <div className="flex justify-end">
             <button
-              className="flex h-10 items-center gap-2 rounded-md bg-marine px-4 text-sm font-bold text-white transition hover:bg-blue-700"
+              className="flex h-10 items-center gap-2 rounded-xl bg-marine px-4 text-sm font-bold text-white transition hover:bg-blue-700"
               onClick={onClose}
             >
               <Send size={16} />
