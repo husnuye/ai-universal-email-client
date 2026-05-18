@@ -10,3 +10,4 @@ assets-preview*.png
 .env.local
 .vercel/
 
+tsconfig.tsbuildinfo

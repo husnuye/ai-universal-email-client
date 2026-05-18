@@ -2,7 +2,7 @@
 
 ## One-Line Summary
 
-An AI-first universal email client that presents Gmail, Office 365, Yahoo IMAP, and AOL IMAP messages in one inbox, then uses agent workflows to summarize, prioritize, search, and draft replies.
+An AI-first universal email client that presents Gmail, Office 365, Yahoo IMAP, and AOL IMAP messages in one inbox, then uses a modular agent workflow to analyze, prioritize, secure, search, and draft replies.
 
 ## Product Scope
 
@@ -27,7 +27,7 @@ Out of scope:
 - tasks
 - notes
 - calendar
-- full provider OAuth production approval
+- full provider OAuth production approval in the demo path
 
 ## High-Level System
 
@@ -38,52 +38,40 @@ User Interface
 Email Application Layer
   |
   +--> Provider Layer
-  |      +--> Gmail adapter
-  |      +--> Office 365 adapter
-  |      +--> IMAP adapter for Yahoo and AOL
+  |      +--> Gmail adapter boundary
+  |      +--> Microsoft Graph / Office 365 adapter boundary
+  |      +--> IMAP adapter boundary for Yahoo and AOL
   |
-  +--> AI Agent Layer
+  +--> Email Workflow Orchestrator
   |      +--> Inbox Analyzer Agent
   |      +--> Priority Agent
+  |      +--> Security Agent
   |      +--> Smart Reply Agent
-  |      +--> Semantic Search Agent
-  |      +--> Security Signal Agent
   |      +--> Follow-Up Agent
+  |
+  +--> Semantic Search Agent
   |
   v
 Data Layer
   +--> accounts
   +--> emails
-  +--> threads
   +--> labels
-  +--> AI insights
+  +--> AI insight results
 ```
 
-## Frontend
+## Agent Layer
 
-Recommended stack:
+The agent layer is intentionally modular:
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- shadcn/ui-style components
-- local state for demo workflows
+- shared schemas: `lib/agents/types.ts`
+- orchestrator: `lib/orchestrator/email-workflow-orchestrator.ts`
+- individual agents: `lib/agents/*`
 
-Primary screens:
-
-- Unified Inbox
-- Email Detail
-- Compose / Reply / Forward
-- AI Insight Panel
-- Search Results
-- Security Center light view
-
-The first screen should be the working inbox, not a landing page.
+Each agent returns structured JSON-compatible data and catches unexpected failures with deterministic fallback behavior. This makes the demo reliable while leaving a clear insertion point for future Claude/OpenAI calls.
 
 ## Provider Layer
 
-The provider layer normalizes different email providers into one internal email shape.
+The provider layer normalizes different providers into one internal email shape.
 
 ```text
 Gmail message
@@ -91,58 +79,47 @@ Office 365 message
 Yahoo/AOL IMAP message
       |
       v
-Normalized Email
+EmailInput
+      |
+      v
+Email Workflow Orchestrator
 ```
 
-For the MVP, provider adapters can read seeded/demo messages. The adapter boundary should make it clear where real OAuth/API integrations would be added.
+For the MVP, provider adapters read seeded/demo messages. In production, OAuth token refresh, Microsoft Graph, Gmail API, and IMAP credentials would stay behind this boundary.
 
-## AI Layer
+## Frontend
 
-The AI layer receives normalized email data and returns structured insights.
+Stack:
 
-Example output:
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- mobile-ready PWA metadata
 
-```json
-{
-  "summary": "Client is asking for a revised proposal by tomorrow.",
-  "priority": "high",
-  "replyNeeded": true,
-  "securityRisk": "low",
-  "suggestedAction": "Send revised proposal and confirm timeline.",
-  "replyDraft": "Hi, thanks for the update. I can send the revised proposal by tomorrow..."
-}
-```
+Primary screens and panels:
 
-For demo stability, AI outputs can be deterministic fixtures or rule-based functions. The architecture should still describe where Claude/OpenAI calls would run in production.
-
-## Data Model
-
-Core entities:
-
-- Account
-- Email
-- Thread
-- Label
-- Attachment metadata
-- AIInsight
-
-The MVP can store data in local fixtures or a lightweight local data module. Production-ready notes can reference PostgreSQL/Prisma.
+- Unified Inbox
+- Email Detail
+- Compose / Reply / Forward
+- AI Insight Panel
+- Semantic Search
+- Security Center light view
+- Assignment Checklist
 
 ## Testing
 
-Minimum tests:
+Coverage includes:
 
-- inbox renders messages from multiple accounts
-- account switching filters correctly
-- search returns relevant emails
-- archive/delete updates inbox state
-- reply draft appears for selected email
-- priority/security labels render
+- independent agent unit tests
+- orchestrator integration-style test
+- compatibility tests for the UI-facing AI helpers
+- Playwright desktop/mobile smoke tests
 
 ## Deployment
 
 Target:
 
 - Vercel
-- environment variables prepared for future provider/API keys
-- PWA metadata and responsive behavior
+- environment variables prepared in `.env.example`
+- no paid AI API required for the demo path

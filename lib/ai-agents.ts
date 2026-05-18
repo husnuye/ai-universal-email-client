@@ -1,129 +1,66 @@
+import { runSemanticSearchAgent } from "./agents/semantic-search-agent";
+import type { EmailInput } from "./agents/types";
+import { runEmailWorkflowOrchestrator } from "./orchestrator/email-workflow-orchestrator";
 import type { AIInsight, Email } from "./types";
 
-const urgentWords = ["before monday", "today", "urgent", "action required", "deadline"];
-const riskWords = ["verify", "card details", "payment method", "limited", "click"];
-
 export function analyzeEmail(email: Email): AIInsight {
-  const text = `${email.subject} ${email.preview} ${email.body}`.toLowerCase();
-  const urgent = urgentWords.some((word) => text.includes(word));
-  const risky = riskWords.filter((word) => text.includes(word));
-  const assignment = text.includes("assignment") || text.includes("claude code");
-  const replyNeeded = /can you|build|send|do you|reply|question/.test(text);
-
-  const priority = assignment || urgent ? "high" : replyNeeded ? "medium" : "low";
-  const securityRisk = risky.length >= 3 ? "high" : risky.length > 0 ? "medium" : "low";
+  const result = runEmailWorkflowOrchestrator(toEmailInput(email));
 
   return {
-    summary: buildSummary(email, assignment),
-    priority,
-    replyNeeded,
-    securityRisk,
-    securityReason:
-      securityRisk === "high"
-        ? "Contains payment pressure and verification language."
-        : securityRisk === "medium"
-          ? "Contains wording commonly seen in account verification messages."
-          : "No obvious phishing signals detected.",
-    suggestedAction: buildSuggestedAction(email, assignment, priority),
-    replyDraft: buildReplyDraft(email, assignment),
-    followUp: replyNeeded
-      ? "Keep this thread visible until a response is sent."
-      : "No follow-up required right now."
+    summary: result.summary,
+    priority: result.priority,
+    replyNeeded: result.replyNeeded,
+    securityRisk: result.securityRisk,
+    securityReason: result.securityReasons.join(" "),
+    suggestedAction: result.suggestedAction,
+    replyDraft: result.replyDraft,
+    followUp: result.followUpRecommendation
   };
 }
 
 export function searchEmails(emails: Email[], query: string): Email[] {
-  const normalized = query.trim().toLowerCase();
+  const emailInputs = emails.map(toEmailInput);
+  const sourceById = new Map(emails.map((email) => [email.id, email]));
 
-  if (!normalized) {
-    return emails;
-  }
+  const result = runSemanticSearchAgent(emailInputs, query, (email) => {
+    const source = sourceById.get(email.id);
+    const workflow = runEmailWorkflowOrchestrator(email);
 
-  return emails.filter((email) => {
-    const insight = analyzeEmail(email);
-    const haystack = [
+    return [
       email.from,
       email.fromEmail,
       email.subject,
       email.preview,
       email.body,
-      email.labels.join(" "),
-      insight.summary,
-      insight.priority,
-      insight.securityRisk,
-      insight.suggestedAction
+      email.labels?.join(" "),
+      source?.labels.join(" "),
+      workflow.summary,
+      workflow.category,
+      workflow.intent,
+      workflow.priority,
+      workflow.securityRisk,
+      workflow.suggestedAction,
+      workflow.replyDraft
     ]
-      .join(" ")
-      .toLowerCase();
-
-    return normalized
-      .split(/\s+/)
       .filter(Boolean)
-      .every((word) => haystack.includes(word) || semanticMatch(word, haystack));
+      .join(" ");
   });
+
+  return result.output.matches
+    .map((match) => sourceById.get(match.id))
+    .filter((email): email is Email => Boolean(email));
 }
 
-function semanticMatch(word: string, haystack: string) {
-  const groups: Record<string, string[]> = {
-    urgent: ["high", "deadline", "today", "monday", "action"],
-    risky: ["payment", "verify", "phishing", "security", "card"],
-    client: ["proposal", "leadership", "review", "call"],
-    deploy: ["vercel", "deployment", "preview", "build"],
-    reply: ["draft", "response", "send", "question", "follow"]
+export function toEmailInput(email: Email): EmailInput {
+  return {
+    id: email.id,
+    accountId: email.accountId,
+    from: email.from,
+    fromEmail: email.fromEmail,
+    subject: email.subject,
+    preview: email.preview,
+    body: email.body,
+    receivedAt: email.receivedAt,
+    labels: email.labels
   };
-
-  return groups[word]?.some((term) => haystack.includes(term)) ?? false;
 }
-
-function buildSummary(email: Email, assignment: boolean) {
-  if (assignment) {
-    return "Assignment asks for a mobile-ready AI email client with unified inbox, provider support, AI summaries, reply drafts, prioritization, tests, and docs.";
-  }
-
-  if (email.subject.toLowerCase().includes("proposal")) {
-    return "Client needs a revised proposal with updated timeline and budget before Monday.";
-  }
-
-  if (email.subject.toLowerCase().includes("payment")) {
-    return "Message pressures the user to verify payment details and should be reviewed carefully.";
-  }
-
-  if (email.subject.toLowerCase().includes("deployment")) {
-    return "Deployment preview is ready and can be reviewed before sharing.";
-  }
-
-  return "Sender is following up on provider integration notes and asking whether they are needed now.";
-}
-
-function buildSuggestedAction(email: Email, assignment: boolean, priority: string) {
-  if (assignment) {
-    return "Ship a focused MVP, document the agent workflow, add tests, and deploy to Vercel.";
-  }
-
-  if (priority === "high") {
-    return "Respond today and keep the thread pinned until complete.";
-  }
-
-  if (email.subject.toLowerCase().includes("payment")) {
-    return "Do not click links until sender and URL are verified.";
-  }
-
-  return "Reply when the current MVP scope is confirmed.";
-}
-
-function buildReplyDraft(email: Email, assignment: boolean) {
-  if (assignment) {
-    return "Hi Taj, thanks for the assignment. I will send the live Vercel URL, CLAUDE.md, architecture notes, agent workflow, and test summary once the MVP is ready.";
-  }
-
-  if (email.subject.toLowerCase().includes("proposal")) {
-    return "Hi Maya, yes, I can send the revised proposal before Monday morning. I will update the timeline and budget and share it for review.";
-  }
-
-  if (email.subject.toLowerCase().includes("payment")) {
-    return "I will verify this request through the official account portal before taking any action.";
-  }
-
-  return "Hi, thanks for following up. Please hold the provider integration notes until the MVP scope is approved.";
-}
-

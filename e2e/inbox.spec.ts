@@ -6,7 +6,7 @@ test("unified inbox shows AI email workflow", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "TriageMail AI" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Unified inbox/ })).toBeVisible();
   await expect(page.getByText("AI-first email client assignment").first()).toBeVisible();
-  await expect(page.getByText("AI insight")).toBeVisible();
+  await expect(page.getByText("AI insight", { exact: true })).toBeVisible();
   await expect(page.getByText("Reply draft", { exact: true })).toBeVisible();
 });
 
@@ -19,7 +19,7 @@ test("semantic search can find risky messages", async ({ page }) => {
   await expect(page.getByText("Action required: verify payment method")).toBeVisible();
   await page.getByTestId("email-card-mail-3").click();
   await expect(page.getByRole("heading", { name: "Action required: verify payment method" })).toBeVisible();
-  await expect(page.getByText("payment pressure")).toBeVisible();
+  await expect(page.getByText("Do not click")).toBeVisible();
 });
 
 test("reply workflow opens composer with AI draft", async ({ page }) => {

@@ -4,6 +4,22 @@ Mobile-ready PWA for a universal AI email inbox.
 
 This project is built for the assignment: create an AI-first email-only client with unified inbox, provider support for Gmail / Office 365 / IMAP for Yahoo and AOL, compose/reply/forward, search, labels, archive/delete, AI summaries, reply drafts, and prioritization.
 
+## Architecture Direction
+
+The app now uses a modular agent orchestration layer instead of one monolithic demo function.
+
+```text
+Incoming Email
+  -> Inbox Analyzer Agent
+  -> Priority Agent
+  -> Security Agent
+  -> Smart Reply Agent
+  -> Follow-Up Agent
+  -> Final AI Email Intelligence Result
+```
+
+Each agent has typed input/output, deterministic fallback behavior, and JSON-compatible results. The current demo does not require paid AI APIs; Claude/OpenAI calls can be plugged into the agent layer later without changing the UI contract.
+
 ## Documents
 
 - [CLAUDE.md](./CLAUDE.md)
@@ -21,19 +37,20 @@ npm run dev
 
 Open `http://127.0.0.1:3000`.
 
-## Verification
+## Quality Commands
 
 ```bash
-npm run build
+npm run lint
+npm run typecheck
 npm test
-npm run test:e2e
+npm run build
 ```
 
-Current coverage:
+Optional browser coverage:
 
-- AI priority, summary, search, and security signal unit tests
-- desktop and mobile Playwright smoke tests
-- inbox render, semantic search, and AI reply workflow
+```bash
+npm run test:e2e
+```
 
 ## MVP Feature Set
 
@@ -46,3 +63,15 @@ Current coverage:
 - AI Rules showing how user-specific inbox instructions would guide prioritization
 - Reply tone selector for professional, friendly, and concise AI drafts
 - Provider architecture note explaining where Gmail, Microsoft Graph, Yahoo IMAP, and AOL IMAP integrations attach
+
+## Final Delivery Checklist
+
+- [ ] Vercel live URL
+- [x] GitHub repo
+- [x] CLAUDE.md
+- [x] Architecture doc
+- [x] Agent/skill/hook/plugin list
+- [x] Workflow writeup
+- [x] Automated tests
+- [x] PWA/mobile-ready UI
+- [x] AI-first features
