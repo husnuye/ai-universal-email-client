@@ -21,7 +21,8 @@ import {
   Zap
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { analyzeEmail, searchEmails } from "@/lib/ai-agents";
+import { searchEmails, toEmailInput } from "@/lib/ai-agents";
+import { runEmailWorkflowOrchestrator } from "@/lib/orchestrator/email-workflow-orchestrator";
 import { accounts, emails as seedEmails } from "@/lib/email-data";
 import type { Email } from "@/lib/types";
 
@@ -55,13 +56,15 @@ export default function Home() {
   const selectedEmail =
     emails.find((email) => email.id === activeEmailId) ?? visibleEmails[0] ?? emails[0];
   const selectedAccount = accounts.find((account) => account.id === selectedEmail.accountId);
-  const insight = analyzeEmail(selectedEmail);
+  const workflowResult = runEmailWorkflowOrchestrator(toEmailInput(selectedEmail));
   const activeEmails = emails.filter((email) => !email.archived && !email.deleted);
-  const insights = activeEmails.map((email) => analyzeEmail(email));
-  const highPriorityCount = insights.filter((item) => item.priority === "high").length;
-  const replyNeededCount = insights.filter((item) => item.replyNeeded).length;
-  const securityReviewCount = insights.filter((item) => item.securityRisk !== "low").length;
-  const tonedReplyDraft = tuneReplyDraft(insight.replyDraft, replyTone);
+  const workflowResults = activeEmails.map((email) =>
+    runEmailWorkflowOrchestrator(toEmailInput(email))
+  );
+  const highPriorityCount = workflowResults.filter((item) => item.priority === "high").length;
+  const replyNeededCount = workflowResults.filter((item) => item.replyNeeded).length;
+  const securityReviewCount = workflowResults.filter((item) => item.securityRisk !== "low").length;
+  const tonedReplyDraft = tuneReplyDraft(workflowResult.replyDraft, replyTone);
 
   function updateEmail(id: string, patch: Partial<Email>) {
     setEmails((current) =>
@@ -203,7 +206,7 @@ export default function Home() {
             <div className="scrollbar-soft max-h-[calc(100vh-190px)] overflow-auto p-2">
               {visibleEmails.map((email) => {
                 const account = accounts.find((item) => item.id === email.accountId);
-                const itemInsight = analyzeEmail(email);
+                const itemWorkflow = runEmailWorkflowOrchestrator(toEmailInput(email));
                 const active = email.id === selectedEmail.id;
 
                 return (
@@ -224,7 +227,7 @@ export default function Home() {
                           {account ? providerNames[account.provider] : "Email"}
                         </div>
                       </div>
-                      <PriorityBadge value={itemInsight.priority} />
+                      <PriorityBadge value={itemWorkflow.priority} />
                     </div>
                     <div className="line-clamp-1 text-sm font-bold text-slate-900">{email.subject}</div>
                     <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">{email.preview}</p>
@@ -259,8 +262,8 @@ export default function Home() {
                   >
                     {selectedAccount?.name ?? "Email"}
                   </span>
-                  <PriorityBadge value={insight.priority} />
-                  <RiskBadge value={insight.securityRisk} />
+                  <PriorityBadge value={workflowResult.priority} />
+                  <RiskBadge value={workflowResult.securityRisk} />
                 </div>
                 <h2 className="text-xl font-bold text-slate-950">{selectedEmail.subject}</h2>
                 <p className="mt-2 text-sm font-medium text-slate-500">
@@ -295,21 +298,21 @@ export default function Home() {
                 <Sparkles size={18} />
                 AI insight
               </div>
-              <InsightBlock title="Summary" value={insight.summary} />
-              <InsightBlock title="Suggested action" value={insight.suggestedAction} />
+              <InsightBlock title="Summary" value={workflowResult.summary} />
+              <InsightBlock title="Suggested action" value={workflowResult.suggestedAction} />
               <ToneSelector value={replyTone} onChange={setReplyTone} />
               <InsightBlock title="Reply draft" value={tonedReplyDraft} />
-              <InsightBlock title="Follow-up" value={insight.followUp} />
+              <InsightBlock title="Follow-up" value={workflowResult.followUpRecommendation} />
               <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900">
-                  {insight.securityRisk === "low" ? (
+                  {workflowResult.securityRisk === "low" ? (
                     <ShieldCheck size={16} />
                   ) : (
                     <BadgeAlert size={16} />
                   )}
                   Security signal
                 </div>
-                <p className="text-sm leading-6 text-slate-600">{insight.securityReason}</p>
+                <p className="text-sm leading-6 text-slate-600">{workflowResult.securityReasons.join(" ")}</p>
               </div>
               <div className="mt-3 rounded-md border border-slate-200 bg-white p-3">
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-900">

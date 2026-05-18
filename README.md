@@ -73,5 +73,6 @@ npm run test:e2e
 - [x] Agent/skill/hook/plugin list
 - [x] Workflow writeup
 - [x] Automated tests
+- [x] Quality commands passing (`npm run typecheck`, `npm test`, `npm run build`)
 - [x] PWA/mobile-ready UI
 - [x] AI-first features
