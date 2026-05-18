@@ -1,5 +1,11 @@
 # AI-First Universal Email Client
 
+![TriageMail AI Dashboard](./assets/ui-polish-preview.png)
+
+## Product Preview
+
+![Full Product Experience](./assets/ui-polish-full-page.png)
+
 Mobile-ready PWA for a universal AI email inbox.
 
 This project is built for the assignment: create an AI-first email-only client with unified inbox, provider support for Gmail / Office 365 / IMAP for Yahoo and AOL, compose/reply/forward, search, labels, archive/delete, AI summaries, reply drafts, and prioritization.
